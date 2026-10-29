@@ -13,6 +13,17 @@ describe('status board', () => {
     expect(html).toContain('2026-10-28');
   });
 
+  it('links each night to its digest with its ok / retry / fail counts (issue #4)', async () => {
+    const res = await createApp(config).request('/');
+    const html = await res.text();
+    expect(html).toContain('<a href="/digest/2026-10-28">2026-10-28</a>');
+    expect(html).toContain('<a href="/digest/2026-10-27">2026-10-27</a>');
+    // 2026-10-28 has 5 jobs: 4 last-ok, 1 fail (fixtures/refresh ended ok; notes/backup failed).
+    expect(html).toContain('4 ok · 0 retry · 1 fail');
+    // 2026-10-27 has 4 jobs, all last-ok.
+    expect(html).toContain('4 ok · 0 retry · 0 fail');
+  });
+
   it('health answers with the lane id', async () => {
     const res = await createApp(config).request('/health');
     expect(await res.json()).toEqual({ ok: true, lane: 'lane-07' });
